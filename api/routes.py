@@ -12936,6 +12936,19 @@ def _session_attention_summary(session_id: str) -> dict | None:
             "count": clarify_count,
             "severity": "question",
         }
+
+    # Подтверждение истекло, очередь пуста, агент остановился текстом: беседа
+    # всё равно ждёт владельца (OPS-STATE-01).
+    from api import session_waiting
+    from api.models import _active_state_db_path
+
+    if session_waiting.expired_approval_wait(session_id, _active_state_db_path()):
+        return {
+            "kind": "attention",
+            "count": 1,
+            "severity": "question",
+            "reason": "approval_expired",
+        }
     return None
 
 
